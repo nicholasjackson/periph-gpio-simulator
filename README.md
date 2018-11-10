@@ -72,9 +72,10 @@ func main() {
     }
   }()
 
-	// Block until a key is pressed
-	c := make(chan os.Signal, 1)
-	signal.Notify(c)
+  // Block until a key is pressed
+  c := make(chan os.Signal, 1)
+  signal.Notify(c)
 
-	s := <-c
+  s := <-c
+}
 ```
