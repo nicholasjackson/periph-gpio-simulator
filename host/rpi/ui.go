@@ -92,6 +92,8 @@ func writeLogline(l string) {
 		return
 	}
 
+	// TODO: if log is more than 120 characters split onto multiple lines
+
 	if len(logLines) > 10 {
 		logLines = logLines[1:]
 	}
