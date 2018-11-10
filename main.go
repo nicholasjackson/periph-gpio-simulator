@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	logger := log.New(os.Stdout, "", log.LUTC)
+	logger := log.New(os.Stdout, "", log.Lmicroseconds)
 
 	// Load all the drivers:
 	if _, err := host.Init(); err != nil {

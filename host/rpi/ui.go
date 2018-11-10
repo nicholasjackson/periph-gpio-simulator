@@ -2,6 +2,7 @@ package rpi
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"os"
 	"strings"
@@ -51,6 +52,8 @@ func init() {
 }
 
 func startRefresh() {
+	defer termbox.Close()
+
 	t := time.Tick(200 * time.Millisecond)
 	for range t {
 		draw()
@@ -58,7 +61,7 @@ func startRefresh() {
 }
 
 func tailLog(filename string) error {
-	for i, r := range "Output:" {
+	for i, r := range "Log (log is also written to ./out.log:" {
 		termbox.SetCell(i, 9, r, termbox.ColorYellow, termbox.ColorBlack)
 	}
 
@@ -86,25 +89,54 @@ func tailLog(filename string) error {
 }
 
 var logLines []string
+var logLineMax = 120
 
 func writeLogline(l string) {
 	if l == "" {
 		return
 	}
 
-	// TODO: if log is more than 120 characters split onto multiple lines
+	// Split the message by max log length
+	lines := splitSubN(l, 120)
 
-	if len(logLines) > 10 {
-		logLines = logLines[1:]
+	// remove old lines from the buffer
+	if len(logLines)+len(lines) > 10 {
+		logLines = logLines[len(lines):]
 	}
 
-	logLines = append(logLines, time.Now().String()+" "+l)
+	// append the lines to the buffer
+	for _, line := range lines {
+		logLines = append(logLines, line)
+	}
 
 	for r, line := range logLines {
-		for c, b := range line {
-			termbox.SetCell(c, r+10, rune(b), termbox.ColorWhite, termbox.ColorBlack)
+		for c := 0; c < logLineMax; c++ {
+			ru := ' '
+			if c < len(line) {
+				ru = rune(line[c])
+			}
+			termbox.SetCell(c, r+10, ru, termbox.ColorWhite, termbox.ColorBlack)
 		}
 	}
+}
+
+func splitSubN(s string, n int) []string {
+	sub := ""
+	subs := []string{}
+
+	runes := bytes.Runes([]byte(s))
+	l := len(runes)
+	for i, r := range runes {
+		sub = sub + string(r)
+		if (i+1)%n == 0 {
+			subs = append(subs, sub)
+			sub = ""
+		} else if (i + 1) == l {
+			subs = append(subs, sub)
+		}
+	}
+
+	return subs
 }
 
 func waitForChange(w *fsnotify.Watcher) error {
@@ -142,6 +174,12 @@ func draw() {
 }
 
 func drawPins(line string, index int) {
+
+	// set the background
+	for c := 0; c < 59; c++ {
+		termbox.SetCell(c, index, ' ', termbox.ColorBlack, termbox.ColorBlack)
+	}
+
 	for _, p := range pins {
 		pos := strings.Index(line, p.Name())
 		var color = termbox.ColorWhite
