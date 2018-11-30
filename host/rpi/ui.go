@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -24,6 +25,7 @@ var piZero = `
 
 var termBoxInitalized bool
 var output *os.File
+var eventQueue chan termbox.Event
 
 func init() {
 	termBoxInitalized = true
@@ -49,14 +51,33 @@ func init() {
 
 	logLines = make([]string, 0)
 	go tailLog("./out.log")
+
+	eventQueue = make(chan termbox.Event)
+	go monitorEvents()
+}
+
+func monitorEvents() {
+	for {
+		eventQueue <- termbox.PollEvent()
+	}
 }
 
 func startRefresh() {
 	defer termbox.Close()
 
-	t := time.Tick(200 * time.Millisecond)
-	for range t {
-		draw()
+	ticker := time.NewTicker(200 * time.Millisecond)
+
+	for {
+		select {
+		case e := <-eventQueue:
+			if e.Key == termbox.KeyCtrlC {
+				log.Println("Exit")
+				ticker.Stop()
+				os.Exit(0)
+			}
+		case <-ticker.C:
+			draw()
+		}
 	}
 }
 

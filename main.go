@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"os/signal"
 	"time"
 
 	"github.com/nicholasjackson/periph-gpio-simulator/host/rpi"
@@ -20,9 +18,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c)
-
 	go func() {
 		l := gpio.High
 		for {
@@ -37,8 +32,6 @@ func main() {
 		}
 	}()
 
-	// Block until a signal is received.
-	s := <-c
-
-	fmt.Println("Got signal", s)
+	for {
+	}
 }
