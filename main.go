@@ -20,11 +20,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	c := make(chan os.Signal, 1)
+	signal.Notify(c)
+
 	go func() {
 		l := gpio.High
 		for {
 			logger.Println("Set pin", l)
-			rpi.P1_15.Out(l)
+			rpi.SO_51.Out(l)
 			if l == gpio.High {
 				l = gpio.Low
 			} else {
@@ -33,9 +36,6 @@ func main() {
 			time.Sleep(1 * time.Second)
 		}
 	}()
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(c)
 
 	// Block until a signal is received.
 	s := <-c
