@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -71,7 +70,6 @@ func startRefresh() {
 		select {
 		case e := <-eventQueue:
 			if e.Key == termbox.KeyCtrlC {
-				log.Println("Exit")
 				ticker.Stop()
 				os.Exit(0)
 			}
