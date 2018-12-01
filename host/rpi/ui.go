@@ -62,15 +62,14 @@ func monitorEvents() {
 }
 
 func startRefresh() {
-	defer termbox.Close()
-
 	ticker := time.NewTicker(200 * time.Millisecond)
 
 	for {
 		select {
 		case e := <-eventQueue:
-			if e.Key == termbox.KeyCtrlC {
+			if e.Key == termbox.KeyCtrlC || e.Key == termbox.KeyEsc {
 				ticker.Stop()
+				termbox.Close()
 				os.Exit(0)
 			}
 		case <-ticker.C:
@@ -80,7 +79,7 @@ func startRefresh() {
 }
 
 func tailLog(filename string) error {
-	for i, r := range "Log (log is also written to ./out.log:" {
+	for i, r := range "Log (log is also written to ./out.log):" {
 		termbox.SetCell(i, 9, r, termbox.ColorYellow, termbox.ColorBlack)
 	}
 
