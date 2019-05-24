@@ -3,6 +3,7 @@ package rpi
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -20,6 +21,7 @@ var piZero = `
 				 ## ## ##    ## ##    ## ## ## ##    ##    ## ## ##
 	 ## ## ##    ## ## ##    ## ## ##    ## ## ## ## ## ##
  +|02|03|04| -|17|27|22| +|10|09|11| -|00|05|06|13|19|16| -
+  | a| s| d|  | f| g| h|  | j| k| l|  | z| x| c| v| b| n| 
 `
 
 var termBoxInitalized bool
@@ -72,15 +74,62 @@ func startRefresh() {
 				termbox.Close()
 				os.Exit(0)
 			}
+
+			fmt.Printf("Key press %s %v", string(e.Ch), e.Ch)
+
+			switch string(e.Ch) {
+			case "a":
+				togglePin(SO_9)
+			case "s":
+				togglePin(SO_11)
+			case "d":
+				togglePin(SO_15)
+			case "f":
+				togglePin(SO_59)
+			case "g":
+				togglePin(SO_89)
+			case "h":
+				togglePin(SO_75)
+			case "j":
+				togglePin(SO_33)
+			case "k":
+				togglePin(SO_29)
+			case "l":
+				togglePin(SO_35)
+			case "z":
+				togglePin(SO_3)
+			case "x":
+				togglePin(SO_17)
+			case "c":
+				togglePin(SO_21)
+			case "v":
+				togglePin(SO_47)
+			case "b":
+				togglePin(SO_65)
+			case "n":
+				togglePin(SO_57)
+			}
+
 		case <-ticker.C:
 			draw()
 		}
+
 	}
+}
+
+func togglePin(p gpio.PinIO) {
+	l := p.Read()
+	if l == gpio.High {
+		p.Out(gpio.Low)
+		return
+	}
+
+	p.Out(gpio.High)
 }
 
 func tailLog(filename string) error {
 	for i, r := range "Log (log is also written to ./out.log):" {
-		termbox.SetCell(i, 9, r, termbox.ColorYellow, termbox.ColorBlack)
+		termbox.SetCell(i, 10, r, termbox.ColorYellow, termbox.ColorBlack)
 	}
 
 	file, _ := os.Open(filename)
@@ -186,6 +235,10 @@ func draw() {
 
 	for col, r := range lines[6] {
 		termbox.SetCell(col, 6, r, termbox.ColorWhite, termbox.ColorBlack)
+	}
+
+	for col, r := range lines[7] {
+		termbox.SetCell(col, 7, r, termbox.ColorWhite, termbox.ColorBlack)
 	}
 
 	termbox.Flush()
