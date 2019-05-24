@@ -3,7 +3,6 @@ package rpi
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -74,8 +73,6 @@ func startRefresh() {
 				termbox.Close()
 				os.Exit(0)
 			}
-
-			fmt.Printf("Key press %s %v", string(e.Ch), e.Ch)
 
 			switch string(e.Ch) {
 			case "a":
