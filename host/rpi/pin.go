@@ -14,6 +14,7 @@ import (
 type Pin struct {
 	num   int
 	level gpio.Level
+	edge  gpio.Edge
 }
 
 //DefaultPull something
@@ -58,6 +59,16 @@ func (p *Pin) Hysteresis() bool {
 
 // In something
 func (p *Pin) In(pull gpio.Pull, edge gpio.Edge) error {
+	if pull == gpio.PullDown {
+		p.level = gpio.Low
+	}
+
+	if pull == gpio.PullUp {
+		p.level = gpio.High
+	}
+
+	p.edge = edge
+
 	return nil
 }
 
@@ -124,5 +135,27 @@ func (p *Pin) SupportedFuncs() []pin.Func {
 
 // WaitForEdge somethings
 func (p *Pin) WaitForEdge(timeout time.Duration) bool {
-	return true
+	c := p.Read() // get the initial state
+	running := true
+
+	if timeout != -1 {
+		time.AfterFunc(timeout, func() {
+			running = false
+		})
+	}
+
+	for running {
+		s := p.Read()
+		// if we are waiting for a rising edge or both
+		if s != c && s == gpio.High && (p.edge == gpio.RisingEdge || p.edge == gpio.BothEdges) {
+			return true
+		}
+
+		// if we are waiting for a falling edge or both
+		if s != c && s == gpio.Low && (p.edge == gpio.FallingEdge || p.edge == gpio.BothEdges) {
+			return true
+		}
+	}
+
+	return false
 }
