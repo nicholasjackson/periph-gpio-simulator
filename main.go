@@ -32,10 +32,10 @@ func main() {
 		}
 	}()
 
-	rpi.SO_9.In(gpio.PullDown, gpio.BothEdges)
-	rpi.SO_9.WaitForEdge(-1)
-	logger.Println("Pin state changed")
+	rpi.SO_9.In(gpio.PullDown, gpio.RisingEdge)
 
 	for {
+		rpi.SO_9.WaitForEdge(-1)
+		logger.Println("Pin state changed")
 	}
 }

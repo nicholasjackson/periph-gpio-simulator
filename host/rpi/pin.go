@@ -155,6 +155,8 @@ func (p *Pin) WaitForEdge(timeout time.Duration) bool {
 		if s != c && s == gpio.Low && (p.edge == gpio.FallingEdge || p.edge == gpio.BothEdges) {
 			return true
 		}
+
+		c = s
 	}
 
 	return false
