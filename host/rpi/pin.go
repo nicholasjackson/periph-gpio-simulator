@@ -157,6 +157,7 @@ func (p *Pin) WaitForEdge(timeout time.Duration) bool {
 		}
 
 		c = s
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	return false
